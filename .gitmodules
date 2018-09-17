@@ -1,3 +1,6 @@
 [submodule "jni/curl"]
 	path = jni/curl
 	url = https://github.com/curl/curl.git
+[submodule "jni/zlib"]
+	path = jni/zlib
+	url = https://github.com/madler/zlib.git
