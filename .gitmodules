@@ -1,0 +1,3 @@
+[submodule "jni/curl"]
+	path = jni/curl
+	url = https://github.com/curl/curl.git
