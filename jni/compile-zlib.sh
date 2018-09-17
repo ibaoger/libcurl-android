@@ -1,0 +1,99 @@
+#!/bin/bash
+APP_ABI=(armeabi-v7a x86 arm64-v8a)
+
+BASE_PATH=$(
+	cd "$(dirname $0)"
+	pwd
+)
+ZLIB_PATH="$BASE_PATH/zlib"
+BUILD_PATH="$BASE_PATH/build"
+
+checkExitCode() {
+	if [ $1 -ne 0 ]; then
+		echo "Error building zlib library"
+		cd $BASE_PATH
+		exit $1
+	fi
+}
+safeMakeDir() {
+	if [ ! -x "$1" ]; then
+		mkdir -p "$1"
+	fi
+}
+
+## Android NDK
+export NDK_ROOT="$NDK_ROOT"
+
+if [ -z "$NDK_ROOT" ]; then
+	echo "Please set your NDK_ROOT environment variable first"
+	exit 1
+fi
+
+## Build zlib
+
+# backup config
+cp $ZLIB_PATH/configure $ZLIB_PATH/configure.bak
+checkExitCode $?
+
+compatibleWithAndroid() {
+	sed 's/case \"$uname\" in/case "_" in/' $ZLIB_PATH/configure >$ZLIB_PATH/configure.temp
+	mv $ZLIB_PATH/configure.temp $ZLIB_PATH/configure
+	chmod 755 $ZLIB_PATH/configure
+}
+
+# compile $1 ABI $2 SYSROOT $3 TOOLCHAIN $4 TARGET $5 CFLAGS
+compile() {
+	cd $ZLIB_PATH
+	ABI=$1
+	SYSROOT=$2
+	TOOLCHAIN=$3
+	TARGET=$4
+	CFLAGS=$5
+	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
+	export CFLAGS="-I$SYSROOT/usr/include --sysroot=$SYSROOT $CFLAGS"
+	# zlib configure
+	export CROSS_PREFIX="$TOOLCHAIN/$TARGET-"
+	# config
+	safeMakeDir $BUILD_PATH/zlib/$ABI
+	compatibleWithAndroid
+	./configure --prefix=$BUILD_PATH/zlib/$ABI
+	checkExitCode $?
+	# clean
+	make clean
+	checkExitCode $?
+	# make
+	make -j 4
+	checkExitCode $?
+	# install
+	make install
+	checkExitCode $?
+	cd $BASE_PATH
+}
+
+for abi in ${APP_ABI[*]}; do
+	case $abi in
+	armeabi-v7a)
+		# https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html#ARM-Options
+		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin" "arm-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+		;;
+	x86)
+		# http://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/darwin-x86_64/bin" "i686-linux-android" "-march=i686"
+		;;
+	arm64-v8a)
+		# https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
+		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
+		;;
+	*)
+		echo "Error APP_ABI"
+		exit 1
+		;;
+	esac
+done
+
+# resume config
+mv $ZLIB_PATH/configure.bak $ZLIB_PATH/configure
+checkExitCode $?
+
+cd $BASE_PATH
+exit 0
