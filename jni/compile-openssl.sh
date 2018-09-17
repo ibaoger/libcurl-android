@@ -1,6 +1,20 @@
 #!/bin/bash
-# http://wiki.openssl.org/index.php/Android
-# http://doc.qt.io/qt-5/opensslsupport.html
+# Compile curl & openssl & zlib for android with NDK.
+# Copyright (C) 2018  shishuo <shishuo365@126.com>
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 APP_ABI=(armeabi-v7a x86 arm64-v8a)
 
 BASE_PATH=$(
@@ -34,6 +48,8 @@ fi
 ## Build OpenSSL
 
 # compile $1 ABI $2 SYSROOT $3 TOOLCHAIN $4 MACHINE $5 SYSTEM $6 ARCH $7 CROSS_COMPILE
+# http://wiki.openssl.org/index.php/Android
+# http://doc.qt.io/qt-5/opensslsupport.html
 compile() {
 	cd $SSL_PATH
 	ABI=$1
