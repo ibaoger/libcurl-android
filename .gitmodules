@@ -4,3 +4,6 @@
 [submodule "jni/zlib"]
 	path = jni/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "jni/openssl"]
+	path = jni/openssl
+	url = https://github.com/openssl/openssl.git
