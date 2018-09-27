@@ -1,17 +1,17 @@
 #!/bin/bash
 # Compile curl & openssl & zlib for android with NDK.
 # Copyright (C) 2018  shishuo <shishuo365@126.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -54,10 +54,6 @@ $BASE_PATH/jni/compile-zlib.sh
 checkExitCode $?
 
 ## Build cURL
-
-# backup config
-cp $CURL_PATH/configure $CURL_PATH/configure.bak
-checkExitCode $?
 
 compatibleWithAndroid() {
 	# options -V -qversion has removed from gcc-4.9
@@ -137,29 +133,34 @@ compile() {
 	checkExitCode $?
 }
 
+# check system
+host=$(uname | tr 'A-Z' 'a-z')
+if [ $host = "darwin" ] || [ $host = "linux" ]; then
+	echo "system: $host"
+else
+	echo "unsupport system, only support Mac OS X and Linux now."
+	exit 1
+fi
+
 for abi in ${APP_ABI[*]}; do
 	case $abi in
 	armeabi-v7a)
 		# https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html#ARM-Options
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin" "arm-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$host-x86_64/bin" "arm-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
 		;;
 	x86)
 		# http://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/darwin-x86_64/bin" "i686-linux-android" "-march=i686"
+		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/$host-x86_64/bin" "i686-linux-android" "-march=i686"
 		;;
 	arm64-v8a)
 		# https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
-		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
+		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
 		;;
 	*)
 		echo "Error APP_ABI"
 		;;
 	esac
 done
-
-# resume config
-mv $CURL_PATH/configure.bak $CURL_PATH/configure
-checkExitCode $?
 
 echo "== build success =="
 echo "path: $BASE_PATH/libs"

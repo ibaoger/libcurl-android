@@ -1,17 +1,17 @@
 #!/bin/bash
 # Compile curl & openssl & zlib for android with NDK.
 # Copyright (C) 2018  shishuo <shishuo365@126.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
@@ -89,16 +89,25 @@ compile() {
 	cd $BASE_PATH
 }
 
+# check system
+host=$(uname | tr 'A-Z' 'a-z')
+if [ $host = "darwin" ] || [ $host = "linux" ]; then
+	echo "system: $host"
+else
+	echo "unsupport system, only support Mac OS X and Linux now."
+	exit 1
+fi
+
 for abi in ${APP_ABI[*]}; do
 	case $abi in
 	armeabi-v7a)
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin" "armv7" "android" "arm" "arm-linux-androideabi-"
+		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$host-x86_64/bin" "armv7" "android" "arm" "arm-linux-androideabi-"
 		;;
 	x86)
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/darwin-x86_64/bin" "i686" "android" "x86" "i686-linux-android-"
+		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/$host-x86_64/bin" "i686" "android" "x86" "i686-linux-android-"
 		;;
 	arm64-v8a)
-		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64/bin" "armv8" "android64" "arm" "aarch64-linux-android-"
+		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin" "armv8" "android64" "arm" "aarch64-linux-android-"
 		;;
 	*)
 		echo "Error APP_ABI"
