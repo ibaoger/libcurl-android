@@ -45,6 +45,10 @@ if [ -z "$NDK_ROOT" ]; then
 	exit 1
 fi
 
+## Clean build directory
+rm -rf $BUILD_PATH
+safeMakeDir $BUILD_PATH
+
 ## Build OpenSSL static library (libssl.a & libcrypto.a)
 $BASE_PATH/jni/compile-openssl.sh
 checkExitCode $?
@@ -101,8 +105,11 @@ compile() {
 		--enable-libgcc \
 		--enable-ipv6
 	checkExitCode $?
+	# clean
+	make clean
+	checkExitCode $?
 	# make
-	make -j 4
+	make -j4
 	checkExitCode $?
 	# install
 	make install

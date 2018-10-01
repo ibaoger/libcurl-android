@@ -45,6 +45,10 @@ if [ -z "$NDK_ROOT" ]; then
 	exit 1
 fi
 
+## Clean build directory
+rm -rf $BUILD_PATH/zlib
+safeMakeDir $BUILD_PATH/zlib
+
 ## Build zlib
 
 # backup config
@@ -78,7 +82,7 @@ compile() {
 	make clean
 	checkExitCode $?
 	# make
-	make -j 4
+	make -j4
 	checkExitCode $?
 	# install
 	make install

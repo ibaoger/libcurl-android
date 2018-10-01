@@ -45,6 +45,10 @@ if [ -z "$NDK_ROOT" ]; then
 	exit 1
 fi
 
+## Clean build directory
+rm -rf $BUILD_PATH/openssl
+safeMakeDir $BUILD_PATH/openssl
+
 ## Build OpenSSL
 
 # compile $1 ABI $2 SYSROOT $3 TOOLCHAIN $4 MACHINE $5 SYSTEM $6 ARCH $7 CROSS_COMPILE
@@ -79,9 +83,9 @@ compile() {
 	make clean
 	checkExitCode $?
 	# make
-	make -j 4 depend
+	make -j4 depend
 	checkExitCode $?
-	make -j 4 all
+	make -j4 all
 	checkExitCode $?
 	# install
 	make install
