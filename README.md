@@ -28,7 +28,10 @@ nroff
 perl
 ```
 
-## Build
+## Building
+
+* Clone this repo `git clone https://github.com/shishuo365/libcurl-android.git`
+* `cd libcurl-android` and clone submodules `git submodule init && git submodule update`
 
 ```
 chmod 755 build_for_android.sh
