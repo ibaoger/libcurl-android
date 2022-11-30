@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-APP_ABI=(armeabi-v7a x86 arm64-v8a)
+APP_ABI=(armeabi-v7a x86 arm64-v8a x86-64)
 
 BASE_PATH=$(
 	cd "$(dirname $0)"
@@ -49,12 +49,12 @@ fi
 rm -rf $BUILD_PATH
 safeMakeDir $BUILD_PATH
 
-## Build OpenSSL static library (libssl.a & libcrypto.a)
-$BASE_PATH/jni/compile-openssl.sh
-checkExitCode $?
-
 ## Build zlib static library (libz.a)
 $BASE_PATH/jni/compile-zlib.sh
+checkExitCode $?
+
+## Build OpenSSL static library (libssl.a & libcrypto.a)
+$BASE_PATH/jni/compile-openssl.sh
 checkExitCode $?
 
 ## Build cURL
@@ -161,6 +161,10 @@ for abi in ${APP_ABI[*]}; do
 	arm64-v8a)
 		# https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
 		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
+		;;
+	x86-64)
+		# http://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "x86_64-linux-android" "-march=x86-64"
 		;;
 	*)
 		echo "Error APP_ABI"

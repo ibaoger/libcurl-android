@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-APP_ABI=(armeabi-v7a x86 arm64-v8a)
+APP_ABI=(armeabi-v7a x86 arm64-v8a x86-64)
 
 BASE_PATH=$(
 	cd "$(dirname $0)"
@@ -38,7 +38,7 @@ safeMakeDir() {
 }
 
 ## Android NDK
-export NDK_ROOT="$NDK_ROOT"
+export ANDROID_NDK_ROOT="$NDK_ROOT"
 
 if [ -z "$NDK_ROOT" ]; then
 	echo "Please set your NDK_ROOT environment variable first"
@@ -100,6 +100,9 @@ for abi in ${APP_ABI[*]}; do
 		;;
 	arm64-v8a)
 		compile $abi "android-arm64" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin"
+		;;
+	x86-64)
+		compile $abi "android-x86_64" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "$NDK_ROOT/toolchains/x86_64-4.9/prebuilt/$host-x86_64/bin"
 		;;
 	*)
 		echo "Error APP_ABI"
