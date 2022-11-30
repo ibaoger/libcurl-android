@@ -57,27 +57,15 @@ safeMakeDir $BUILD_PATH/openssl
 compile() {
 	cd $SSL_PATH
 	ABI=$1
-	SYSROOT=$2
+	ARCH=$2
 	TOOLCHAIN=$3
-	MACHINE=$4
-	SYSTEM=$5
-	ARCH=$6
-	CROSS_COMPILE=$7
+	TOOLCHAIN_2=$4
 	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
-	export SYSROOT=$SYSROOT
-	export PATH="$TOOLCHAIN":"$PATH"
-	# OpenSSL Configure
-	export CROSS_COMPILE=$CROSS_COMPILE
-	export ANDROID_DEV=$SYSROOT/usr
-	export HOSTCC=gcc
-	# Most of these should be OK (MACHINE, SYSTEM, ARCH).
-	export MACHINE=$MACHINE
-	export SYSTEM=$SYSTEM
-	export ARCH=$ARCH
-	# config
+	export API=23
+	export PATH=$TOOLCHAIN:$TOOLCHAIN_2:$PATH
 	safeMakeDir $BUILD_PATH/openssl/$ABI
 	checkExitCode $?
-	./Configure android no-shared --openssldir=$BUILD_PATH/openssl/$ABI
+	./Configure $ARCH --prefix=$BUILD_PATH/openssl/$ABI --openssldir=$BUILD_PATH/openssl/$ABI -D__ANDROID_API__=23
 	checkExitCode $?
 	# clean
 	make clean
@@ -105,13 +93,13 @@ fi
 for abi in ${APP_ABI[*]}; do
 	case $abi in
 	armeabi-v7a)
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$host-x86_64/bin" "armv7" "android" "arm" "arm-linux-androideabi-"
+		compile $abi "android-arm" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$host-x86_64/bin"
 		;;
 	x86)
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/$host-x86_64/bin" "i686" "android" "x86" "i686-linux-android-"
+		compile $abi "android-x86" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/$host-x86_64/bin"
 		;;
 	arm64-v8a)
-		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin" "armv8" "android64" "arm" "aarch64-linux-android-"
+		compile $abi "android-arm64" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin"
 		;;
 	*)
 		echo "Error APP_ABI"

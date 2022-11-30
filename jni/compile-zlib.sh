@@ -70,6 +70,13 @@ compile() {
 	TARGET=$4
 	CFLAGS=$5
 	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
+	export API=23
+	export CC=$TOOLCHAIN/$TARGET$API-clang
+	export AS=$CC
+	export AR=$TOOLCHAIN/llvm-ar
+	export LD=$TOOLCHAIN/ld
+	export RANLIB=$TOOLCHAIN/llvm-ranlib
+	export STRIP=$TOOLCHAIN/llvm-strip
 	export CFLAGS="-I$SYSROOT/usr/include --sysroot=$SYSROOT $CFLAGS"
 	# zlib configure
 	export CROSS_PREFIX="$TOOLCHAIN/$TARGET-"
@@ -103,15 +110,15 @@ for abi in ${APP_ABI[*]}; do
 	case $abi in
 	armeabi-v7a)
 		# https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html#ARM-Options
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$host-x86_64/bin" "arm-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "armv7a-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
 		;;
 	x86)
 		# http://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/$host-x86_64/bin" "i686-linux-android" "-march=i686"
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "i686-linux-android" "-march=i686"
 		;;
 	arm64-v8a)
 		# https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
-		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
 		;;
 	*)
 		echo "Error APP_ABI"
