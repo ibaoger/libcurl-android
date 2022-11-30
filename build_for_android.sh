@@ -45,17 +45,17 @@ if [ -z "$NDK_ROOT" ]; then
 	exit 1
 fi
 
-## Clean build directory
-#rm -rf $BUILD_PATH
-#safeMakeDir $BUILD_PATH
-#
-### Build OpenSSL static library (libssl.a & libcrypto.a)
-#$BASE_PATH/jni/compile-openssl.sh
-#checkExitCode $?
-#
-### Build zlib static library (libz.a)
-#$BASE_PATH/jni/compile-zlib.sh
-#checkExitCode $?
+# Clean build directory
+rm -rf $BUILD_PATH
+safeMakeDir $BUILD_PATH
+
+## Build OpenSSL static library (libssl.a & libcrypto.a)
+$BASE_PATH/jni/compile-openssl.sh
+checkExitCode $?
+
+## Build zlib static library (libz.a)
+$BASE_PATH/jni/compile-zlib.sh
+checkExitCode $?
 
 ## Build cURL
 
@@ -170,6 +170,7 @@ done
 
 echo "== build success =="
 echo "path: $BASE_PATH/libs"
+rm $BASE_PATH/obj
 
 cd $BASE_PATH
 exit 0
