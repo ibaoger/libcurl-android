@@ -170,7 +170,7 @@ done
 
 echo "== build success =="
 echo "path: $BASE_PATH/libs"
-rm $BASE_PATH/obj
+rm -rf $BASE_PATH/obj
 
 cd $BASE_PATH
 exit 0
