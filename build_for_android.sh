@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-APP_ABI=(armeabi-v7a x86 arm64-v8a x86-64)
+APP_ABI=(armeabi-v7a arm64-v8a x86-64)
 
 BASE_PATH=$(
 	cd "$(dirname $0)"
@@ -46,16 +46,16 @@ if [ -z "$NDK_ROOT" ]; then
 fi
 
 # Clean build directory
-#rm -rf $BUILD_PATH
-#safeMakeDir $BUILD_PATH
+rm -rf $BUILD_PATH
+safeMakeDir $BUILD_PATH
 
 ## Build zlib static library (libz.a)
 $BASE_PATH/jni/compile-zlib.sh
 checkExitCode $?
 
 ## Build OpenSSL static library (libssl.a & libcrypto.a)
-#$BASE_PATH/jni/compile-openssl.sh
-#checkExitCode $?
+$BASE_PATH/jni/compile-openssl.sh
+checkExitCode $?
 
 ## Build cURL
 
@@ -75,7 +75,7 @@ compile() {
 	TARGET=$4
 	CFLAGS=$5
 	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
-	export API=23
+	export API=21
 	export CC=$TOOLCHAIN/$TARGET$API-clang
 	export CXX=$TOOLCHAIN/$TARGET$API-clang++
 	export LD=$TOOLCHAIN/ld
@@ -84,15 +84,18 @@ compile() {
 	export RANLIB=$TOOLCHAIN/llvm-ranlib
 	export NM=$TOOLCHAIN/llvm-nm
 	export STRIP=$TOOLCHAIN/llvm-strip
-	export CFLAGS="-I$SYSROOT/usr/include --sysroot=$SYSROOT $CFLAGS"
+	export CFLAGS="--sysroot=$SYSROOT $CFLAGS"
 	export CPPFLAGS="-I$SYSROOT/usr/include --sysroot=$SYSROOT"
-	export PKG_CONFIG_PATH="$BUILD_PATH/openssl/$ABI/lib/pkgconfig"
+	export LDFLAGS="-L$BUILD_PATH/openssl/$ABI/lib -L$BUILD_PATH/zlib/$ABI/lib"
+	export LIBS="-lssl -lcrypto -lc++ -lz"
+	#export PKG_CONFIG_PATH="$BUILD_PATH/openssl/$ABI/lib/pkgconfig"
 	# config
 	autoreconf -fi
 	checkExitCode $?
 	safeMakeDir $BUILD_PATH/curl/$ABI
 	compatibleWithAndroid
 	# https://stackoverflow.com/questions/12636536/install-curl-with-openssl
+	# https://curl.se/docs/install.html#android
 	./configure --host=$TARGET \
 		--prefix=$BUILD_PATH/curl/$ABI \
 		--with-ssl=$BUILD_PATH/openssl/$ABI \
@@ -101,7 +104,6 @@ compile() {
 		--enable-shared \
 		--disable-verbose \
 		--enable-threaded-resolver \
-		--enable-libgcc \
 		--enable-ipv6
 	checkExitCode $?
 	# clean

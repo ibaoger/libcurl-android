@@ -1,23 +1,22 @@
 # cURL for Android
 
-Compile curl, openssl, zlib with Android NDK.
+使用 Android NDK 编译 curl, openssl, zlib。
 
-Support for compilation on these systems:
+支持在以下系统中编译:
 + Mac OS X
 + Linux 64-bit
 
-## Before build
+## 编译前的准备工作
 
-Download android ndk-r22b or above from [here](https://developer.android.com/ndk/downloads/),
-and set NDK_ROOT in your system environment variable.
+从 [这里](https://developer.android.com/ndk/downloads/) 下载 android ndk-r22b 或以上版本，然后在你的编译系统中做以下设置
 
-For example:
+设置 NDK_ROOT 变量，例如：
 
 ```
-export NDK_ROOT=your_ndk_path
+export NDK_ROOT=android ndk 在你的编译系统中的绝对路径
 ```
 
-Install dependent:
+安装编译依赖：
 
 + **autoconf** >= 2.57
 + **automake** >= 1.7
@@ -26,22 +25,22 @@ Install dependent:
 + nroff
 + perl
 
-## Building
+## 编译
 
-* Clone this repo and submodules
+* 克隆项目并更新子模块
 ```
 git clone https://github.com/shishuo365/libcurl-android.git
 cd libcurl-android
 git submodule init && git submodule update
 ```
 
-* Build
+* 编译
 ```
 chmod 755 build_for_android.sh
 ./build_for_android.sh
 ```
 
-* Incremental build
+* 增量编译（用于修改部分代码后的快速编译）
 ```
 sed -i'' 's/make clean/#make clean/' jni/compile-zlib.sh
 sed -i'' 's/make clean/#make clean/' jni/compile-openssl.sh
@@ -50,7 +49,7 @@ sed -i'' 's/rm -rf $BUILD_PATH/#rm -rf $BUILD_PATH/' build_for_android.sh
 ./build_for_android.sh
 ```
 
-## Binary and Library
+## 可运行程序和动态静态库
 
 ```
 # cURL
@@ -68,7 +67,7 @@ jni/build/zlib/*/lib/libz.a
 jni/build/zlib/*/lib/libz.so
 ```
 
-## License
+## 许可
 
 [GPL-2.0](./LICENSE)  
 [cURL](https://github.com/curl/curl/blob/master/COPYING)  

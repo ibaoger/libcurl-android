@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-APP_ABI=(armeabi-v7a x86 arm64-v8a x86-64)
+APP_ABI=(armeabi-v7a arm64-v8a x86-64)
 
 BASE_PATH=$(
 	cd "$(dirname $0)"
@@ -70,7 +70,7 @@ compile() {
 	TARGET=$4
 	CFLAGS=$5
 	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
-	export API=23
+	export API=21
 	export CC=$TOOLCHAIN/$TARGET$API-clang
 	export AS=$CC
 	export AR=$TOOLCHAIN/llvm-ar
@@ -94,8 +94,6 @@ compile() {
 	# install
 	make install
 	checkExitCode $?
-	make clean
-	cd $BASE_PATH
 }
 
 # check system

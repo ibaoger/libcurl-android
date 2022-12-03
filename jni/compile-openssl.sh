@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-APP_ABI=(armeabi-v7a x86 arm64-v8a x86-64)
+APP_ABI=(armeabi-v7a arm64-v8a x86-64)
 
 BASE_PATH=$(
 	cd "$(dirname $0)"
@@ -61,11 +61,11 @@ compile() {
 	TOOLCHAIN=$3
 	TOOLCHAIN_2=$4
 	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
-	export API=23
+	export API=21
 	export PATH=$TOOLCHAIN:$TOOLCHAIN_2:$PATH
 	safeMakeDir $BUILD_PATH/openssl/$ABI
 	checkExitCode $?
-	./Configure $ARCH --prefix=$BUILD_PATH/openssl/$ABI --openssldir=$BUILD_PATH/openssl/$ABI -D__ANDROID_API__=23
+	./Configure $ARCH --prefix=$BUILD_PATH/openssl/$ABI --openssldir=$BUILD_PATH/openssl/$ABI -D__ANDROID_API__=$API
 	checkExitCode $?
 	# clean
 	make clean
