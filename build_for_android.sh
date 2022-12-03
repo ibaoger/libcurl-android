@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-APP_ABI=(armeabi-v7a x86 arm64-v8a)
+APP_ABI=(armeabi-v7a x86 arm64-v8a x86-64)
 
 BASE_PATH=$(
 	cd "$(dirname $0)"
@@ -45,17 +45,17 @@ if [ -z "$NDK_ROOT" ]; then
 	exit 1
 fi
 
-## Clean build directory
-rm -rf $BUILD_PATH
-safeMakeDir $BUILD_PATH
-
-## Build OpenSSL static library (libssl.a & libcrypto.a)
-$BASE_PATH/jni/compile-openssl.sh
-checkExitCode $?
+# Clean build directory
+#rm -rf $BUILD_PATH
+#safeMakeDir $BUILD_PATH
 
 ## Build zlib static library (libz.a)
 $BASE_PATH/jni/compile-zlib.sh
 checkExitCode $?
+
+## Build OpenSSL static library (libssl.a & libcrypto.a)
+#$BASE_PATH/jni/compile-openssl.sh
+#checkExitCode $?
 
 ## Build cURL
 
@@ -75,21 +75,20 @@ compile() {
 	TARGET=$4
 	CFLAGS=$5
 	# https://android.googlesource.com/platform/ndk/+/ics-mr0/docs/STANDALONE-TOOLCHAIN.html
-	export SYSROOT="$SYSROOT"
-	export CFLAGS="$CFLAGS --sysroot=$SYSROOT"
+	export API=23
+	export CC=$TOOLCHAIN/$TARGET$API-clang
+	export CXX=$TOOLCHAIN/$TARGET$API-clang++
+	export LD=$TOOLCHAIN/ld
+	export AS=$TOOLCHAIN/llvm-as
+	export AR=$TOOLCHAIN/llvm-ar
+	export RANLIB=$TOOLCHAIN/llvm-ranlib
+	export NM=$TOOLCHAIN/llvm-nm
+	export STRIP=$TOOLCHAIN/llvm-strip
+	export CFLAGS="-I$SYSROOT/usr/include --sysroot=$SYSROOT $CFLAGS"
 	export CPPFLAGS="-I$SYSROOT/usr/include --sysroot=$SYSROOT"
-	export CC="$TOOLCHAIN/$TARGET-gcc"
-	export CPP="$TOOLCHAIN/$TARGET-cpp"
-	export CXX="$TOOLCHAIN/$TARGET-g++"
-	export LD="$TOOLCHAIN/$TARGET-ld"
-	export AS="$TOOLCHAIN/$TARGET-as"
-	export AR="$TOOLCHAIN/$TARGET-ar"
-	export NM="$TOOLCHAIN/$TARGET-nm"
-	export STRIP="$TOOLCHAIN/$TARGET-strip"
-	export RANLIB="$TOOLCHAIN/$TARGET-ranlib"
 	export PKG_CONFIG_PATH="$BUILD_PATH/openssl/$ABI/lib/pkgconfig"
 	# config
-	./buildconf
+	autoreconf -fi
 	checkExitCode $?
 	safeMakeDir $BUILD_PATH/curl/$ABI
 	compatibleWithAndroid
@@ -153,15 +152,19 @@ for abi in ${APP_ABI[*]}; do
 	case $abi in
 	armeabi-v7a)
 		# https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html#ARM-Options
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-arm" "$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/$host-x86_64/bin" "arm-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon"
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "armv7a-linux-androideabi" "-march=armv7-a -mfloat-abi=softfp -mfpu=neon -fPIC"
 		;;
 	x86)
 		# http://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
-		compile $abi "$NDK_ROOT/platforms/android-12/arch-x86" "$NDK_ROOT/toolchains/x86-4.9/prebuilt/$host-x86_64/bin" "i686-linux-android" "-march=i686"
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "i686-linux-android" "-march=i686 -fPIC"
 		;;
 	arm64-v8a)
 		# https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html#AArch64-Options
-		compile $abi "$NDK_ROOT/platforms/android-21/arch-arm64" "$NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/$host-x86_64/bin" "aarch64-linux-android" "-march=armv8-a"
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "aarch64-linux-android" "-march=armv8-a -fPIC"
+		;;
+	x86-64)
+		# http://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+		compile $abi "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/sysroot" "$NDK_ROOT/toolchains/llvm/prebuilt/$host-x86_64/bin" "x86_64-linux-android" "-march=x86-64 -fPIC"
 		;;
 	*)
 		echo "Error APP_ABI"
@@ -171,6 +174,7 @@ done
 
 echo "== build success =="
 echo "path: $BASE_PATH/libs"
+rm -rf $BASE_PATH/obj
 
 cd $BASE_PATH
 exit 0
