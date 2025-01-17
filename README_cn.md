@@ -29,7 +29,7 @@ export NDK_ROOT=android ndk 在你的编译系统中的绝对路径
 
 * 克隆项目并更新子模块
 ```
-git clone https://github.com/shishuo365/libcurl-android.git
+git clone https://github.com/ibaoger/libcurl-android.git
 cd libcurl-android
 git submodule init && git submodule update
 ```
@@ -54,8 +54,8 @@ sed -i'' 's/rm -rf $BUILD_PATH/#rm -rf $BUILD_PATH/' build_for_android.sh
 ```
 # cURL
 jni/build/curl/*/curl
-jni/libs/*/libcurl.a
-jni/libs/*/libcurl.so
+libs/*/libcurl.a
+libs/*/libcurl.so
 
 # OpenSSL
 jni/build/openssl/*/bin/openssl
